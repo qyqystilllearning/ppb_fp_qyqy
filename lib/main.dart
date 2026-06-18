@@ -4,9 +4,9 @@ void main() {
   runApp(MaterialApp(
     home: Scaffold(
       appBar: AppBar(
-        title: Text('Rizqys first app lohya')
+        title: Text('Rizqys first app lohya'),
+        centerTitle: true,
       ),
-      body: Text("ini area privasiku privasiku privasiku y")
-    ),
-  ));
+      body: Center(child: Text("ini area privasiku privasiku privasiku y")),
+  )));
 }
