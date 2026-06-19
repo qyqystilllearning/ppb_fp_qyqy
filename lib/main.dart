@@ -13,21 +13,41 @@
             centerTitle: true,
             backgroundColor: Colors.amber[200],
           ),
-          body: Center( // the body (the main content)
-            child: Text(
-              'perihal cincin, kucari waktu',
-              style: TextStyle(
-                fontSize: 15.0,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2.0,
-                color: Colors.grey[600],
-              ),
+          body: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                  ),
+                  width: 100,
+                  height: 100,
+                  child: Text('Container atas'),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                  ),
+                  width: 150,
+                  height: 150,
+                  child: Text('Container bawah'),
+                ),
+              ],
             ),
           ),
-          floatingActionButton: FloatingActionButton( // the floating action button (the button that floats on the screen)
+          floatingActionButton: ElevatedButton(
             onPressed: () {},
-            child: Text('y'),
-            backgroundColor: Color(0xFF42A5F5),
+            child: Icon(Icons.add),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.lightBlue,
+              shape: CircleBorder(),
+              padding: EdgeInsets.all(20.0),
+            ),
           ),
         ),
       );
