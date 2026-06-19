@@ -1,55 +1,95 @@
+import 'package:flutter/material.dart';
 
-  import 'package:flutter/material.dart';
+void main() => runApp(MyApp());
 
-  void main() => runApp(MyApp());
-
-  class MyApp extends StatelessWidget {
-    @override
-    Widget build(BuildContext context) {
-      return MaterialApp( // the whole screen
-        home: Scaffold( // the appbar and body
-          appBar: AppBar( // the appbar (kind of like the header)
-            title: Text("Rizqys first app lohya"),
-            centerTitle: true,
-            backgroundColor: Colors.amber[200],
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: true, // Keeping the debug banner to match your screenshot
+      home: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          title: Text(
+            "Indonesia Edition 🇮🇩",
+            style: TextStyle(color: Colors.black87),
           ),
-          body: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black),
-            ),
+          centerTitle: true,
+          backgroundColor: Color(0xFFFCE38A), // Light amber/yellow color from image
+          elevation: 0,
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch, // Makes containers fill the width
               children: [
+                // 1. The Image Box (Light Blue)
                 Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
+                  color: Color(0xFFC7EBF0), // Light blue background
+                  padding: EdgeInsets.all(24.0),
+                  child: Image.asset(
+                    'assets/prabowo.png',
+                    height: 250,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 250,
+                        color: Colors.grey[800],
+                        child: Center(child: Text("Your image goes here", style: TextStyle(color: Colors.white))),
+                      );
+                    },
                   ),
-                  width: 100,
-                  height: 100,
-                  child: Text('Container atas'),
                 ),
+                SizedBox(height: 24), // Spacing between boxes
+                
+                // 2. The Text Box (Light Pink)
                 Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
+                  color: Color(0xFFF1C8D4), // Light pink background
+                  padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+                  child: Text(
+                    "Who is this person?",
+                    style: TextStyle(fontSize: 16, color: Colors.black87),
                   ),
-                  width: 150,
-                  height: 150,
-                  child: Text('Container bawah'),
+                ),
+                SizedBox(height: 24), // Spacing between boxes
+                
+                // 3. The Icon Row Box (Light Yellow)
+                Container(
+                  color: Color(0xFFFDF1B6), // Light yellow background
+                  padding: EdgeInsets.symmetric(vertical: 24.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Spaces icons evenly
+                    children: [
+                      Column(
+                        children: [
+                          Icon(Icons.account_circle, color: Colors.black87),
+                          SizedBox(height: 8),
+                          Text("President", style: TextStyle(color: Colors.black87)),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Icon(Icons.flag, color: Colors.black87), // umbrella icon
+                          SizedBox(height: 8),
+                          Text("Candidate", style: TextStyle(color: Colors.black87)),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Icon(Icons.groups_rounded, color: Colors.black87),
+                          SizedBox(height: 8),
+                          Text("Military", style: TextStyle(color: Colors.black87)),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-          floatingActionButton: ElevatedButton(
-            onPressed: () {},
-            child: Icon(Icons.add),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.lightBlue,
-              shape: CircleBorder(),
-              padding: EdgeInsets.all(20.0),
-            ),
-          ),
         ),
-      );
-    }
+      ),
+    );
   }
+}
