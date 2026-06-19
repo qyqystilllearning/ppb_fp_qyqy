@@ -8,5 +8,9 @@ void main() {
         centerTitle: true,
       ),
       body: Center(child: Text("ini area privasiku privasiku privasiku y")),
+       floatingActionButton: FloatingActionButton(
+      onPressed: () { },
+      child: Text('ya'),
+       ),
   )));
 }
