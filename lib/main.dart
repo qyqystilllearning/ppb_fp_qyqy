@@ -1,193 +1,227 @@
-import 'package:ppb_fp/models/note_database.dart';
-import 'package:ppb_fp/pages/notes_page.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'services/isar_service.dart';
+import 'models/ingredient.dart';
+import 'models/recipe.dart';
 
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await NoteDatabase.initialize();
-
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => NoteDatabase(),
-      child: const MyApp(),
-    )
-  );
+void main() {
+  runApp(MyApp());
 }
 
-
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  // We create one instance of our IsarService to pass to the app
+  final IsarService isarService = IsarService();
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: NotesPage()
+      home: RecipeBookHome(isarService: isarService),
     );
   }
 }
 
-// class RowColumnPage extends StatelessWidget {
-//   const RowColumnPage({Key? key}) : super(key: key);
+class RecipeBookHome extends StatefulWidget {
+  final IsarService isarService;
 
-//   @override
-//   Widget build(BuildContext context) {
-//     MediaQueryData mediaQueryData = MediaQuery.of(context);
-//     double screenWidth = mediaQueryData.size.width;
-//     double screenHeight = mediaQueryData.size.height;
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text(
-//           'Indonesia Edition 🇮🇩',
-//           style: TextStyle(color: Colors.black),
-//         ),
-//         backgroundColor: Colors.orange[200],
-//         centerTitle: true,
-//       ),
-//       body: Column(
-//         crossAxisAlignment: CrossAxisAlignment.center,
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         children: <Widget>[
-//           Container(
-//             child: AspectRatio(
-//               aspectRatio: 1.0,
-//               child: Container(
-//                 width: MediaQuery.of(context).size.width,
-//                 margin: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 10.0),
-//                 padding: EdgeInsets.all(20.0),
-//                 color: Colors.lightBlue[100],
-//                 child: Center(
-//                   child: Image.asset(
-//                     'assets/prabowo.png',
-//                     fit: BoxFit.cover,
-//                     width: 500,
-//                   ),
-//                 ),
-//               ),
-//             ),
-//           ),
-//           Container(
-//             width: MediaQuery.of(context).size.width,
-//             margin: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 10.0),
-//             padding: EdgeInsets.all(20.0),
-//             color: Colors.pink[200],
-//             child: Text('What image is that', style: TextStyle(fontSize: 16)),
-//           ),
-//           // Container(
-//           //   width: MediaQuery.of(context).size.width,
-//           //   color: Colors.yellow[200],
-//           //   padding: EdgeInsets.all(20.0),
-//           //   margin: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),
-//           //   child: Row(
-//           //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//           //     crossAxisAlignment: CrossAxisAlignment.start,
-//           //     children: <Widget>[
-//           //       Column(children: [Icon(Icons.account_circle), Text("President")]),
-//           //       Column(children: [Icon(Icons.flag), Text("Candidate")]),
-//           //       Column(children: [Icon(Icons.groups_rounded), Text("Military")]),
-//           //     ],
-//           //   ),
-//           // ),
-//           // CounterCard(),
-//           FormImage(),
-//         ],
-//       ),
-//     );
-//   }
-// }
+  RecipeBookHome({required this.isarService});
 
-// // class CounterCard extends StatefulWidget {
-// //   const CounterCard({super.key});
+  @override
+  _RecipeBookHomeState createState() => _RecipeBookHomeState();
+}
 
-// //   @override
-// //   State<CounterCard> createState() => _CounterCardState();
-// // }
+class _RecipeBookHomeState extends State<RecipeBookHome> {
+  // To handle switching between the two tabs
+  int _currentIndex = 0;
 
-// // class _CounterCardState extends State<CounterCard> {
-// //   int _counter = 0; // This is the state (data) that changes.
+  // Controllers for our text input boxes
+  final _ingredientController = TextEditingController();
+  final _recipeController = TextEditingController();
 
-// //   void _incrementCounter() {
-// //     setState(() {
-// //       _counter++; // Update the state.
-// //     });
-// //   }
+  // State variables to hold data downloaded from the database
+  List<Ingredient> _pantry = [];
+  List<Recipe> _recipes = [];
+  
+  // A temporary list to keep track of which checkboxes are ticked!
+  List<Ingredient> _selectedIngredients = [];
 
-// //   @override
-// //   Widget build(BuildContext context) {
-// //     return Container(
-// //       margin: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),
-// //       padding: EdgeInsets.all(20.0),
-// //       width: MediaQuery.of(context).size.width,
-// //       color: Colors.cyan[100],
-// //       child: Row(
-// //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-// //         children: [
-// //           Text("Proud Indonesian: $_counter", style: TextStyle(fontSize: 16)),
-// //           Container(
-// //             color: Colors.cyan[200],
-// //             padding: EdgeInsets.all(5.0),
-// //             child: IconButton(
-// //               onPressed: _incrementCounter,
-// //               icon: Icon(Icons.add, color: Colors.black, size: 16),
-// //             ),
-// //           ),
-// //         ],
-// //       ),
-// //     );
-// //   }
-// // }
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
 
-// class FormImage extends StatefulWidget {
-//   const FormImage({super.key});
+  // Fetch all ingredients and recipes from the database
+  void _loadData() async {
+    final ingredients = await widget.isarService.getAllIngredients();
+    final recipes = await widget.isarService.getAllRecipes();
+    setState(() {
+      _pantry = ingredients;
+      _recipes = recipes;
+    });
+  }
 
-//   @override
-//   State<FormImage> createState() => _FormImageState();
-// }
+  // --- DATABASE ACTIONS ---
+  
+  void _addIngredient() async {
+    if (_ingredientController.text.isEmpty) return;
+    
+    // Create a new Ingredient object
+    final newIngredient = Ingredient()..name = _ingredientController.text;
+    
+    // Save it to the database
+    await widget.isarService.saveIngredient(newIngredient);
+    
+    _ingredientController.clear();
+    _loadData(); // Refresh the screen
+  }
 
-// class _FormImageState extends State<FormImage> {
-//   final _formKey = GlobalKey<FormState>();
-//   String _answer = '';
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//         child: Column(
-//           children: [
-//             Padding(
-//               padding: const EdgeInsets.all(20.0),
-//               child: Form(
-//                 key: _formKey,
-//                 child: Column(
-//                   children: [
-//                     TextFormField(
-//                       decoration: InputDecoration(label: Text("Enter your answer")),
-//                       validator: (value) => value!.isEmpty ? 'Please answer' : null,
-//                       onSaved: (value) => setState(() {
-//                         _answer = value!;
-//                       }),
-//                     ),
-//                     ElevatedButton(onPressed: () {
-//                       if (_formKey.currentState!.validate()) {
-//                         _formKey.currentState!.save();
-//                         _formKey.currentState!.reset();
-//                       }
+  void _saveRecipe() async {
+    if (_recipeController.text.isEmpty || _selectedIngredients.isEmpty) return;
 
-//                     }, child: Text("Answer"))
-//                   ],
-//                 ),
-//               ),
-//             ),
-//             Container(
-//                 width: MediaQuery.of(context).size.width,
-//                 margin: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 10.0),
-//                 padding: EdgeInsets.all(20.0),
-//                 color: Colors.yellow[200],
-//                 child: Text("Your answer: $_answer"))
+    // Create a new Recipe object
+    final newRecipe = Recipe()..title = _recipeController.text;
+    
+    // Call our magical Many-to-Many service method!
+    await widget.isarService.saveRecipe(newRecipe, _selectedIngredients);
 
-//           ],
-//         )
-//     );
-//   }
-// }
+    _recipeController.clear();
+    setState(() {
+      _selectedIngredients.clear(); // Reset the checkboxes
+    });
+    _loadData(); // Refresh the screen
+  }
+
+  // --- UI SCREENS ---
+
+  Widget _buildPantryTab() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text("Add raw ingredients to your pantry!", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _ingredientController,
+                  decoration: InputDecoration(hintText: "e.g., Flour, Eggs, Sugar"),
+                ),
+              ),
+              IconButton(icon: Icon(Icons.add_circle, color: Colors.blue, size: 40), onPressed: _addIngredient),
+            ],
+          ),
+          Divider(),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _pantry.length,
+              itemBuilder: (context, index) {
+                return Card(
+                  child: ListTile(
+                    leading: Icon(Icons.kitchen),
+                    title: Text(_pantry[index].name),
+                  ),
+                );
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecipesTab() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: _recipeController,
+            decoration: InputDecoration(hintText: "Recipe Name (e.g., Pancakes)", labelText: "Create a new Recipe"),
+          ),
+          SizedBox(height: 10),
+          Text("Select Ingredients Required:", style: TextStyle(fontWeight: FontWeight.bold)),
+          
+          // A mini scrollable box for checkboxes
+          Container(
+            height: 150,
+            decoration: BoxDecoration(border: Border.all(color: Colors.grey[300]!)),
+            child: ListView.builder(
+              itemCount: _pantry.length,
+              itemBuilder: (context, index) {
+                final ingredient = _pantry[index];
+                return CheckboxListTile(
+                  title: Text(ingredient.name),
+                  value: _selectedIngredients.contains(ingredient), // Is it checked?
+                  onChanged: (bool? checked) {
+                    setState(() {
+                      if (checked == true) {
+                        _selectedIngredients.add(ingredient);
+                      } else {
+                        _selectedIngredients.remove(ingredient);
+                      }
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+          SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: _saveRecipe,
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[300]),
+            child: Text("Save Recipe", style: TextStyle(color: Colors.black)),
+          ),
+          Divider(),
+          Text("Your Saved Recipes:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _recipes.length,
+              itemBuilder: (context, index) {
+                final recipe = _recipes[index];
+                
+                // IMPORTANT: We must call .loadSync() to actually pull the linked ingredients from the database!
+                recipe.ingredients.loadSync(); 
+                
+                // Map the ingredient objects into a single string like "Flour, Eggs, Sugar"
+                final ingredientNames = recipe.ingredients.map((i) => i.name).join(", ");
+                
+                return Card(
+                  color: Colors.orange[50],
+                  child: ListTile(
+                    title: Text(recipe.title, style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text("Requires: $ingredientNames"),
+                  ),
+                );
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Isar Recipe Book"),
+        backgroundColor: Colors.orange[300],
+      ),
+      // Switch between the two tabs depending on what is clicked on the bottom bar
+      body: _currentIndex == 0 ? _buildPantryTab() : _buildRecipesTab(),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.kitchen), label: "Pantry"),
+          BottomNavigationBarItem(icon: Icon(Icons.book), label: "Recipes"),
+        ],
+      ),
+    );
+  }
+}
