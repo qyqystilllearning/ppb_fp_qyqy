@@ -1,29 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'services/isar_service.dart';
+import 'services/firestore_service.dart';
 import 'models/ingredient.dart';
 import 'models/recipe.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   // We create one instance of our IsarService to pass to the app
   final IsarService isarService = IsarService();
+  final FirestoreService firestoreService = FirestoreService();
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: RecipeBookHome(isarService: isarService),
+      home: RecipeBookHome(
+        isarService: isarService,
+        firestoreService: firestoreService,
+      ),
     );
   }
 }
 
 class RecipeBookHome extends StatefulWidget {
   final IsarService isarService;
+  final FirestoreService firestoreService;
 
-  RecipeBookHome({required this.isarService});
+  RecipeBookHome({required this.isarService, required this.firestoreService});
 
   @override
   _RecipeBookHomeState createState() => _RecipeBookHomeState();
@@ -36,6 +50,7 @@ class _RecipeBookHomeState extends State<RecipeBookHome> {
   // Controllers for our text input boxes
   final _ingredientController = TextEditingController();
   final _recipeController = TextEditingController();
+  final _cloudNoteController = TextEditingController();
 
   // State variables to hold data downloaded from the database
   List<Ingredient> _pantry = [];
@@ -91,7 +106,75 @@ class _RecipeBookHomeState extends State<RecipeBookHome> {
     _loadData(); // Refresh the screen
   }
 
+  // --- CLOUD DATABASE ACTIONS ---
+  void _addCloudNote() async {
+    if (_cloudNoteController.text.isEmpty) return;
+    await widget.firestoreService.addNote(_cloudNoteController.text);
+    _cloudNoteController.clear();
+    // We don't need _loadData() here because the StreamBuilder automatically updates the UI!
+  }
+
   // --- UI SCREENS ---
+
+  Widget _buildCloudNotesTab() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text("Save a note directly to Firebase Cloud!", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _cloudNoteController,
+                  decoration: InputDecoration(hintText: "Type a cloud note here..."),
+                ),
+              ),
+              IconButton(icon: Icon(Icons.cloud_upload, color: Colors.blue, size: 40), onPressed: _addCloudNote),
+            ],
+          ),
+          Divider(),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: widget.firestoreService.getNotesStream(),
+              builder: (context, snapshot) {
+                // If it's loading data from the internet
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                
+                // If there's an error
+                if (snapshot.hasError) {
+                  return Center(child: Text("Error: ${snapshot.error}"));
+                }
+
+                // If we have data!
+                final notes = snapshot.data?.docs ?? [];
+                
+                if (notes.isEmpty) {
+                  return Center(child: Text("No cloud notes yet!"));
+                }
+
+                return ListView.builder(
+                  itemCount: notes.length,
+                  itemBuilder: (context, index) {
+                    final noteData = notes[index].data() as Map<String, dynamic>;
+                    return Card(
+                      color: Colors.blue[50],
+                      child: ListTile(
+                        leading: Icon(Icons.cloud, color: Colors.blue),
+                        title: Text(noteData['text'] ?? ''),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
 
   Widget _buildPantryTab() {
     return Padding(
@@ -208,8 +291,12 @@ class _RecipeBookHomeState extends State<RecipeBookHome> {
         title: Text("Isar Recipe Book"),
         backgroundColor: Colors.orange[300],
       ),
-      // Switch between the two tabs depending on what is clicked on the bottom bar
-      body: _currentIndex == 0 ? _buildPantryTab() : _buildRecipesTab(),
+      // Switch between the THREE tabs depending on what is clicked on the bottom bar
+      body: _currentIndex == 0 
+          ? _buildPantryTab() 
+          : _currentIndex == 1 
+              ? _buildRecipesTab() 
+              : _buildCloudNotesTab(),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -220,6 +307,7 @@ class _RecipeBookHomeState extends State<RecipeBookHome> {
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.kitchen), label: "Pantry"),
           BottomNavigationBarItem(icon: Icon(Icons.book), label: "Recipes"),
+          BottomNavigationBarItem(icon: Icon(Icons.cloud), label: "Cloud"),
         ],
       ),
     );
