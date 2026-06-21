@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'services/isar_service.dart';
 import 'services/firestore_service.dart';
 import 'models/ingredient.dart';
 import 'models/recipe.dart';
+import 'screens/login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +16,35 @@ void main() async {
   );
 
   runApp(MyApp());
+}
+
+class AuthWrapper extends StatelessWidget {
+  final IsarService isarService;
+  final FirestoreService firestoreService;
+
+  const AuthWrapper({required this.isarService, required this.firestoreService, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        // If the user is logged in, show the Recipe Book
+        if (snapshot.hasData) {
+          return RecipeBookHome(
+            isarService: isarService,
+            firestoreService: firestoreService,
+          );
+        } else {
+          // If NOT logged in, show the Login Screen
+          return const LoginScreen();
+        }
+      },
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -25,7 +56,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: RecipeBookHome(
+      home: AuthWrapper(
         isarService: isarService,
         firestoreService: firestoreService,
       ),
@@ -290,6 +321,14 @@ class _RecipeBookHomeState extends State<RecipeBookHome> {
       appBar: AppBar(
         title: Text("Isar Recipe Book"),
         backgroundColor: Colors.orange[300],
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+            },
+          )
+        ],
       ),
       // Switch between the THREE tabs depending on what is clicked on the bottom bar
       body: _currentIndex == 0 
