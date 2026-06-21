@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.example.ppb_fp"
-    compileSdk = 34
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -22,7 +22,7 @@ android {
         applicationId = "com.example.ppb_fp"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = 33
         versionCode = flutter.versionCode
         versionName = flutter.versionName

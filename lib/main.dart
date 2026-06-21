@@ -291,6 +291,20 @@ class _RecipeBookHomeState extends State<RecipeBookHome> {
           ),
           Divider(),
           Text("Your Saved Recipes:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          OutlinedButton(
+            onPressed: () async {
+              await NotificationService.createNotification(
+                id: 1,
+                title: 'Cooking Timer',
+                body: 'Beep beep! Your food is ready!',
+                scheduled: false, // Changed to instant to test!
+              );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Instant notification triggered!')));
+              }
+            },
+            child: const Text('Test Instant Notification'),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: _recipes.length,

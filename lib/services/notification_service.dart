@@ -1,7 +1,7 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 
-import '../main.dart'; // To access MyApp.navigatorKey later for Phase 6
+// import '../main.dart';
 
 class NotificationService {
   static Future<void> initializeNotification() async {
