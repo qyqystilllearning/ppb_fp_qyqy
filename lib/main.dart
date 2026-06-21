@@ -8,12 +8,15 @@ import 'services/firestore_service.dart';
 import 'models/ingredient.dart';
 import 'models/recipe.dart';
 import 'screens/login.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  await NotificationService.initializeNotification();
 
   runApp(MyApp());
 }
