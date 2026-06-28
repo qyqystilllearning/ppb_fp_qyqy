@@ -60,6 +60,7 @@ class DatabaseService {
           'dueDate': task.dueDate?.toIso8601String(),
           'orderIndex': task.orderIndex,
         });
+        debugPrint('☁️ BACKEND LOG: Task "${task.title}" successfully synced to Firebase Cloud!');
       }
     } catch (e) {
       // Fails silently for offline-first architecture
@@ -90,6 +91,7 @@ class DatabaseService {
             .collection('tasks')
             .doc(id.toString())
             .delete();
+        debugPrint('☁️ BACKEND LOG: Task successfully DELETED from Firebase Cloud!');
       }
     } catch (e) {
       debugPrint('Firebase Delete Error: $e');
@@ -125,6 +127,7 @@ class DatabaseService {
           batch.update(docRef, {'orderIndex': i});
         }
         await batch.commit();
+        debugPrint('☁️ BACKEND LOG: New Task order successfully SYNCED to Firebase Cloud!');
       }
     } catch (e) {
       debugPrint('Firebase Error: $e');
