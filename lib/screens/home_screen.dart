@@ -259,6 +259,16 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _showInDevelopment() {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('In development! Coming soon...'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   Widget _buildBottomNav() {
     return BottomAppBar(
       shape: const CircularNotchedRectangle(),
@@ -267,11 +277,23 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          IconButton(icon: const Icon(Icons.home_filled, color: AppTheme.primaryColor), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.pie_chart_outline, color: Colors.grey), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.home_filled, color: AppTheme.primaryColor), 
+            onPressed: () {}, // Already on home
+          ),
+          IconButton(
+            icon: const Icon(Icons.pie_chart_outline, color: Colors.grey), 
+            onPressed: _showInDevelopment,
+          ),
           const SizedBox(width: 48), // Space for FAB
-          IconButton(icon: const Icon(Icons.bar_chart, color: Colors.grey), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.person_outline, color: Colors.grey), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.bar_chart, color: Colors.grey), 
+            onPressed: _showInDevelopment,
+          ),
+          IconButton(
+            icon: const Icon(Icons.person_outline, color: Colors.grey), 
+            onPressed: _showInDevelopment,
+          ),
         ],
       ),
     );
