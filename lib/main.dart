@@ -31,7 +31,30 @@ void main() async {
     ],
   );
 
+  AwesomeNotifications().setListeners(
+    onActionReceivedMethod: NotificationController.onActionReceivedMethod,
+    onNotificationCreatedMethod: NotificationController.onNotificationCreatedMethod,
+    onNotificationDisplayedMethod: NotificationController.onNotificationDisplayedMethod,
+  );
+
   runApp(const MyApp());
+}
+
+class NotificationController {
+  @pragma("vm:entry-point")
+  static Future<void> onNotificationCreatedMethod(ReceivedNotification receivedNotification) async {
+    debugPrint('🔔 BACKEND LOG: Notification successfully SCHEDULED/CREATED: ${receivedNotification.title}');
+  }
+
+  @pragma("vm:entry-point")
+  static Future<void> onNotificationDisplayedMethod(ReceivedNotification receivedNotification) async {
+    debugPrint('✅ BACKEND LOG: Notification physically DISPLAYED on screen: ${receivedNotification.title}');
+  }
+
+  @pragma("vm:entry-point")
+  static Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
+    debugPrint('👆 BACKEND LOG: User TAPPED the notification: ${receivedAction.title}');
+  }
 }
 
 class MyApp extends StatefulWidget {
