@@ -33,7 +33,11 @@ class DatabaseService {
           body: task.description?.isNotEmpty == true ? task.description : 'Don\'t forget to complete your task!',
           notificationLayout: NotificationLayout.Default,
         ),
-        schedule: NotificationCalendar.fromDate(date: task.dueDate!),
+        schedule: NotificationCalendar.fromDate(
+          date: task.dueDate!,
+          preciseAlarm: true,
+          allowWhileIdle: true,
+        ),
       );
     } else {
       AwesomeNotifications().cancel(task.id);
