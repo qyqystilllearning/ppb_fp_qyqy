@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 import '../models/todo_task.dart';
 import '../services/database_service.dart';
 import '../theme/app_theme.dart';
@@ -269,6 +270,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _fireTestNotification() {
+    AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: 999,
+        channelKey: 'task_reminders',
+        title: 'Test Notification! 🎉',
+        body: 'If you see this, the notification system is working perfectly!',
+        notificationLayout: NotificationLayout.Default,
+      ),
+    );
+  }
+
   Widget _buildBottomNav() {
     return BottomAppBar(
       shape: const CircularNotchedRectangle(),
@@ -283,7 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.pie_chart_outline, color: Colors.grey), 
-            onPressed: _showInDevelopment,
+            onPressed: _fireTestNotification, // TEST BUTTON
           ),
           const SizedBox(width: 48), // Space for FAB
           IconButton(

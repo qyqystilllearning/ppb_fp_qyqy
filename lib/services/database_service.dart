@@ -1,11 +1,14 @@
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:flutter/foundation.dart';
 import '../models/todo_task.dart';
 
 class DatabaseService {
   static late Isar isar;
 
-  // Initialize Isar
   static Future<void> initialize() async {
     final dir = await getApplicationDocumentsDirectory();
     isar = await Isar.open(
@@ -14,41 +17,113 @@ class DatabaseService {
     );
   }
 
-  // Create or Update a Task
   static Future<void> saveTask(TodoTask task) async {
+    // 1. Save to Local Isar Database
     await isar.writeTxn(() async {
       await isar.todoTasks.put(task);
     });
-    // Note: Firebase Sync will be triggered from here in Phase 5!
+
+    // 2. Schedule or Cancel Notification
+    if (task.dueDate != null && task.dueDate!.isAfter(DateTime.now()) && !task.isCompleted) {
+      AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: task.id,
+          channelKey: 'task_reminders',
+          title: 'Task Due: ${task.title}',
+          body: task.description?.isNotEmpty == true ? task.description : 'Don\'t forget to complete your task!',
+          notificationLayout: NotificationLayout.Default,
+        ),
+        schedule: NotificationCalendar.fromDate(date: task.dueDate!),
+      );
+    } else {
+      AwesomeNotifications().cancel(task.id);
+    }
+
+    // 3. Sync to Firebase Firestore
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('tasks')
+            .doc(task.id.toString())
+            .set({
+          'title': task.title,
+          'description': task.description,
+          'isCompleted': task.isCompleted,
+          'category': task.category,
+          'dueDate': task.dueDate?.toIso8601String(),
+          'orderIndex': task.orderIndex,
+        });
+      }
+    } catch (e) {
+      // Fails silently for offline-first architecture
+      debugPrint('Firebase Sync Error: $e');
+    }
   }
 
-  // Read all tasks (Stream for real-time UI updates)
   static Stream<List<TodoTask>> listenToTasks() {
     return isar.todoTasks.where().sortByOrderIndex().watch(fireImmediately: true);
   }
 
-  // Delete a Task
   static Future<void> deleteTask(Id id) async {
+    // 1. Delete from Local DB
     await isar.writeTxn(() async {
       await isar.todoTasks.delete(id);
     });
+    
+    // 2. Cancel Notification
+    AwesomeNotifications().cancel(id);
+
+    // 3. Delete from Firebase
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('tasks')
+            .doc(id.toString())
+            .delete();
+      }
+    } catch (e) {
+      debugPrint('Firebase Delete Error: $e');
+    }
   }
 
-  // Reorder Tasks (Drag and Drop functionality)
   static Future<void> reorderTasks(int oldIndex, int newIndex, List<TodoTask> currentTasks) async {
     if (oldIndex < newIndex) {
-      newIndex -= 1; // Adjust because item is removed before insertion
+      newIndex -= 1;
     }
-
     final TodoTask item = currentTasks.removeAt(oldIndex);
     currentTasks.insert(newIndex, item);
 
-    // Update all order indexes
+    // 1. Update order locally
     await isar.writeTxn(() async {
       for (int i = 0; i < currentTasks.length; i++) {
         currentTasks[i].orderIndex = i;
         await isar.todoTasks.put(currentTasks[i]);
       }
     });
+
+    // 2. Batch update Firebase
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final batch = FirebaseFirestore.instance.batch();
+        for (int i = 0; i < currentTasks.length; i++) {
+          final docRef = FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('tasks')
+              .doc(currentTasks[i].id.toString());
+          batch.update(docRef, {'orderIndex': i});
+        }
+        await batch.commit();
+      }
+    } catch (e) {
+      debugPrint('Firebase Error: $e');
+    }
   }
 }
