@@ -43,6 +43,7 @@ dependencies:
   firebase_auth: ^6.5.3
   awesome_notifications: 0.12.0
   material_symbols_icons: ^4.2951.0
+  intl: ^0.20.3
 
 dev_dependencies:
   flutter_test:
