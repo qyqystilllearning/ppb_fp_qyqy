@@ -18,76 +18,104 @@ class TaskTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        onTap: onTap,
-        leading: Checkbox(
-          value: task.isCompleted,
-          onChanged: onToggleComplete,
-          activeColor: Theme.of(context).primaryColor,
-        ),
-        title: Text(
-          task.title,
-          style: TextStyle(
-            decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-            fontWeight: FontWeight.bold,
-            color: task.isCompleted ? Colors.grey : Theme.of(context).textTheme.bodyLarge?.color,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (task.description != null && task.description!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  task.description!,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            const SizedBox(height: 8),
-            Row(
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            )
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (task.category != null && task.category!.isNotEmpty) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                // Checkbox / Icon
+                GestureDetector(
+                  onTap: () => onToggleComplete(!task.isCompleted),
+                  child: Container(
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      color: task.isCompleted 
+                          ? Theme.of(context).primaryColor 
+                          : Theme.of(context).scaffoldBackgroundColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      task.isCompleted ? Icons.check : Icons.circle_outlined,
+                      color: task.isCompleted ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        task.title,
+                        style: TextStyle(
+                          decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: task.isCompleted ? Colors.grey : Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
+                      ),
+                      if (task.dueDate != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          DateFormat('dd MMM, hh:mm a').format(task.dueDate!),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                
+                // Category or Trailing Action
+                if (task.category != null && task.category!.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       task.category!,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.secondary,
                       ),
                     ),
+                  )
+                else
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                    onPressed: onDelete,
                   ),
-                  const SizedBox(width: 8),
-                ],
-                if (task.dueDate != null) ...[
-                  Icon(Icons.calendar_today, size: 14, color: Theme.of(context).colorScheme.secondary),
-                  const SizedBox(width: 4),
-                  Text(
-                    DateFormat('MMM d, h:mm a').format(task.dueDate!),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.secondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
               ],
             ),
-          ],
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-          onPressed: onDelete,
+          ),
         ),
       ),
     );
