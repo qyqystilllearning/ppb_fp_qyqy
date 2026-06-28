@@ -1,3 +1,4 @@
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'register_screen.dart';
@@ -41,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.check_circle_outline, size: 100, color: Theme.of(context).primaryColor),
+              Icon(Symbols.graph_1, size: 100, color: Theme.of(context).primaryColor),
               const SizedBox(height: 32),
               Text('Welcome Back', style: Theme.of(context).textTheme.displayLarge),
               const SizedBox(height: 8),
