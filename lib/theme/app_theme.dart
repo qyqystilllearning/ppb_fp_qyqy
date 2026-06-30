@@ -8,9 +8,9 @@ class AppTheme {
   
   // Backgrounds
   static const Color bgLight = Color(0xFFF8F9FA); // Very light grey
-  static const Color bgDark = Color(0xFF121212);
+  static const Color bgDark = Color(0xFF15202B); // Twitter "Dim" Background
   static const Color cardLight = Colors.white;
-  static const Color cardDark = Color(0xFF1E1E1E);
+  static const Color cardDark = Color(0xFF192734); // Twitter "Dim" Card
 
   // Text Colors
   static const Color textPrimaryLight = Color(0xFF1F1F39);
