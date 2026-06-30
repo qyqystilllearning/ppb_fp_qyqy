@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../main.dart';
 import '../theme/app_theme.dart';
+import '../services/database_service.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -43,7 +44,8 @@ class ProfileScreen extends StatelessWidget {
                 title: const Text('Dark Mode', style: TextStyle(fontWeight: FontWeight.bold)),
                 secondary: Icon(isDark ? Icons.dark_mode : Icons.light_mode, color: AppTheme.primaryColor),
                 value: isDark,
-                activeColor: AppTheme.primaryColor,
+                activeTrackColor: AppTheme.primaryColor.withValues(alpha: 0.5),
+                activeThumbColor: AppTheme.primaryColor,
                 onChanged: (val) {
                   MyApp.switchTheme(context, val);
                 },
@@ -61,7 +63,11 @@ class ProfileScreen extends StatelessWidget {
                 leading: const Icon(Icons.logout, color: Colors.redAccent),
                 title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent)),
                 onTap: () async {
+                  // WIPE LOCAL DATA FIRST!
+                  await DatabaseService.clearLocalData();
+                  // THEN LOGOUT OF FIREBASE
                   await FirebaseAuth.instance.signOut();
+                  
                   if (context.mounted) {
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   }

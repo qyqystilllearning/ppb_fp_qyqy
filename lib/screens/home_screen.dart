@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:awesome_notifications/awesome_notifications.dart';
 import '../models/todo_task.dart';
 import '../services/database_service.dart';
 import '../theme/app_theme.dart';
@@ -253,24 +252,59 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showInDevelopment() {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('In development! Coming soon...'),
-        duration: Duration(seconds: 2),
+  Future<void> _showStatistics() async {
+    final tasks = await DatabaseService.getAllTasks();
+    final completed = tasks.where((t) => t.isCompleted).length;
+    final total = tasks.length;
+    final double percentage = total == 0 ? 0 : (completed / total);
+
+    if (!mounted) return;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).cardTheme.color,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Productivity Stats', style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 22)),
+            const SizedBox(height: 24),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  height: 120,
+                  width: 120,
+                  child: CircularProgressIndicator(
+                    value: percentage,
+                    strokeWidth: 12,
+                    backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                    color: AppTheme.primaryColor,
+                  ),
+                ),
+                Text('${(percentage * 100).toInt()}%', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Text('$completed out of $total tasks completed.', style: Theme.of(context).textTheme.bodyLarge),
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
 
-  void _fireTestNotification() {
-    AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id: 999,
-        channelKey: 'task_reminders',
-        title: 'Test Notification! 🎉',
-        body: 'If you see this, the notification system is working perfectly!',
-        notificationLayout: NotificationLayout.Default,
+  void _showInDevelopment() {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Calendar View is in development! 🚀'),
+        duration: const Duration(seconds: 2),
+        backgroundColor: AppTheme.primaryColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
       ),
     );
   }
@@ -289,12 +323,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.pie_chart_outline, color: Colors.grey), 
-            onPressed: _fireTestNotification, // TEST BUTTON
+            onPressed: _showStatistics, // Analytics Popup
           ),
           const SizedBox(width: 48), // Space for FAB
           IconButton(
-            icon: const Icon(Icons.bar_chart, color: Colors.grey), 
-            onPressed: _showInDevelopment,
+            icon: const Icon(Icons.calendar_today, color: Colors.grey), 
+            onPressed: _showInDevelopment, // Coming Soon
           ),
           IconButton(
             icon: const Icon(Icons.person_outline, color: Colors.grey), 

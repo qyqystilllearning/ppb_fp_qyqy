@@ -72,6 +72,10 @@ class DatabaseService {
     return isar.todoTasks.where().sortByOrderIndex().watch(fireImmediately: true);
   }
 
+  static Future<List<TodoTask>> getAllTasks() async {
+    return await isar.todoTasks.where().findAll();
+  }
+
   static Future<void> deleteTask(Id id) async {
     // 1. Delete from Local DB
     await isar.writeTxn(() async {
@@ -132,5 +136,14 @@ class DatabaseService {
     } catch (e) {
       debugPrint('Firebase Error: $e');
     }
+  }
+
+  static Future<void> clearLocalData() async {
+    // 1. Wipe local database on logout
+    await isar.writeTxn(() async {
+      await isar.todoTasks.clear();
+    });
+    // 2. Cancel any pending notifications from the previous user
+    AwesomeNotifications().cancelAll();
   }
 }
