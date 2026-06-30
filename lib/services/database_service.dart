@@ -146,4 +146,57 @@ class DatabaseService {
     // 2. Cancel any pending notifications from the previous user
     AwesomeNotifications().cancelAll();
   }
+
+  static Future<void> syncTasksFromFirestore() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('tasks')
+          .get();
+
+      await isar.writeTxn(() async {
+        await isar.todoTasks.clear(); // Ensure clean slate
+        for (var doc in snapshot.docs) {
+          final data = doc.data();
+          final task = TodoTask()
+            ..id = int.parse(doc.id)
+            ..title = data['title'] ?? ''
+            ..description = data['description']
+            ..isCompleted = data['isCompleted'] ?? false
+            ..category = data['category']
+            ..orderIndex = data['orderIndex'] ?? 0;
+            
+          if (data['dueDate'] != null) {
+            task.dueDate = DateTime.parse(data['dueDate']);
+            
+            // Re-schedule notifications for downloaded tasks
+            if (task.dueDate!.isAfter(DateTime.now()) && !task.isCompleted) {
+              AwesomeNotifications().createNotification(
+                content: NotificationContent(
+                  id: task.id,
+                  channelKey: 'task_reminders',
+                  title: 'Task Due: ${task.title}',
+                  body: task.description?.isNotEmpty == true ? task.description : 'Don\'t forget to complete your task!',
+                  notificationLayout: NotificationLayout.Default,
+                ),
+                schedule: NotificationCalendar.fromDate(
+                  date: task.dueDate!,
+                  preciseAlarm: true,
+                  allowWhileIdle: true,
+                ),
+              );
+            }
+          }
+          await isar.todoTasks.put(task);
+        }
+      });
+      debugPrint('☁️ BACKEND LOG: Successfully synced ${snapshot.docs.length} tasks down from Firebase!');
+    } catch (e) {
+      debugPrint('Firebase Sync Down Error: $e');
+    }
+  }
 }
