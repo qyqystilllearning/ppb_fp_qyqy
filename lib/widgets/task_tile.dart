@@ -87,32 +87,33 @@ class TaskTile extends StatelessWidget {
                           ),
                         ),
                       ],
+                      if (task.category != null && task.category!.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            task.category!,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
                 
-                // Category or Trailing Action
-                if (task.category != null && task.category!.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      task.category!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                    ),
-                  )
-                else
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                    onPressed: onDelete,
-                  ),
+                // Always show Delete Action
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  onPressed: onDelete,
+                ),
               ],
             ),
           ),
