@@ -6,6 +6,7 @@ import '../services/database_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/task_tile.dart';
 import 'add_edit_task_screen.dart';
+import 'profile_screen.dart';
 
 enum TaskFilter { all, incomplete, complete }
 
@@ -80,14 +81,6 @@ class _HomeScreenState extends State<HomeScreen> {
               IconButton(
                 icon: const Icon(Icons.search),
                 onPressed: () {},
-                style: IconButton.styleFrom(
-                  backgroundColor: Theme.of(context).cardTheme.color,
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.logout),
-                onPressed: () => FirebaseAuth.instance.signOut(),
                 style: IconButton.styleFrom(
                   backgroundColor: Theme.of(context).cardTheme.color,
                 ),
@@ -305,7 +298,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.person_outline, color: Colors.grey), 
-            onPressed: _showInDevelopment,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+            },
           ),
         ],
       ),
