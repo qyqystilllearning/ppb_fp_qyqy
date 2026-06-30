@@ -47,8 +47,13 @@ const TodoTaskSchema = CollectionSchema(
       name: r'orderIndex',
       type: IsarType.long,
     ),
-    r'title': PropertySchema(
+    r'reminderDate': PropertySchema(
       id: 6,
+      name: r'reminderDate',
+      type: IsarType.dateTime,
+    ),
+    r'title': PropertySchema(
+      id: 7,
       name: r'title',
       type: IsarType.string,
     )
@@ -107,7 +112,8 @@ void _todoTaskSerialize(
   writer.writeString(offsets[3], object.firestoreId);
   writer.writeBool(offsets[4], object.isCompleted);
   writer.writeLong(offsets[5], object.orderIndex);
-  writer.writeString(offsets[6], object.title);
+  writer.writeDateTime(offsets[6], object.reminderDate);
+  writer.writeString(offsets[7], object.title);
 }
 
 TodoTask _todoTaskDeserialize(
@@ -124,7 +130,8 @@ TodoTask _todoTaskDeserialize(
   object.id = id;
   object.isCompleted = reader.readBool(offsets[4]);
   object.orderIndex = reader.readLong(offsets[5]);
-  object.title = reader.readString(offsets[6]);
+  object.reminderDate = reader.readDateTimeOrNull(offsets[6]);
+  object.title = reader.readString(offsets[7]);
   return object;
 }
 
@@ -148,6 +155,8 @@ P _todoTaskDeserializeProp<P>(
     case 5:
       return (reader.readLong(offset)) as P;
     case 6:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 7:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -871,6 +880,77 @@ extension TodoTaskQueryFilter
     });
   }
 
+  QueryBuilder<TodoTask, TodoTask, QAfterFilterCondition> reminderDateIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'reminderDate',
+      ));
+    });
+  }
+
+  QueryBuilder<TodoTask, TodoTask, QAfterFilterCondition>
+      reminderDateIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'reminderDate',
+      ));
+    });
+  }
+
+  QueryBuilder<TodoTask, TodoTask, QAfterFilterCondition> reminderDateEqualTo(
+      DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'reminderDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TodoTask, TodoTask, QAfterFilterCondition>
+      reminderDateGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'reminderDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TodoTask, TodoTask, QAfterFilterCondition> reminderDateLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'reminderDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TodoTask, TodoTask, QAfterFilterCondition> reminderDateBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'reminderDate',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<TodoTask, TodoTask, QAfterFilterCondition> titleEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1081,6 +1161,18 @@ extension TodoTaskQuerySortBy on QueryBuilder<TodoTask, TodoTask, QSortBy> {
     });
   }
 
+  QueryBuilder<TodoTask, TodoTask, QAfterSortBy> sortByReminderDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reminderDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TodoTask, TodoTask, QAfterSortBy> sortByReminderDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reminderDate', Sort.desc);
+    });
+  }
+
   QueryBuilder<TodoTask, TodoTask, QAfterSortBy> sortByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -1180,6 +1272,18 @@ extension TodoTaskQuerySortThenBy
     });
   }
 
+  QueryBuilder<TodoTask, TodoTask, QAfterSortBy> thenByReminderDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reminderDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TodoTask, TodoTask, QAfterSortBy> thenByReminderDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reminderDate', Sort.desc);
+    });
+  }
+
   QueryBuilder<TodoTask, TodoTask, QAfterSortBy> thenByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -1234,6 +1338,12 @@ extension TodoTaskQueryWhereDistinct
     });
   }
 
+  QueryBuilder<TodoTask, TodoTask, QDistinct> distinctByReminderDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'reminderDate');
+    });
+  }
+
   QueryBuilder<TodoTask, TodoTask, QDistinct> distinctByTitle(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1283,6 +1393,12 @@ extension TodoTaskQueryProperty
   QueryBuilder<TodoTask, int, QQueryOperations> orderIndexProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'orderIndex');
+    });
+  }
+
+  QueryBuilder<TodoTask, DateTime?, QQueryOperations> reminderDateProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'reminderDate');
     });
   }
 

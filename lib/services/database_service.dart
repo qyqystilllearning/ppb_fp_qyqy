@@ -24,17 +24,17 @@ class DatabaseService {
     });
 
     // 2. Schedule or Cancel Notification
-    if (task.dueDate != null && task.dueDate!.isAfter(DateTime.now()) && !task.isCompleted) {
+    if (task.reminderDate != null && task.reminderDate!.isAfter(DateTime.now()) && !task.isCompleted) {
       AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: task.id,
           channelKey: 'task_reminders',
-          title: 'Task Due: ${task.title}',
+          title: 'Reminder: ${task.title}',
           body: task.description?.isNotEmpty == true ? task.description : 'Don\'t forget to complete your task!',
           notificationLayout: NotificationLayout.Default,
         ),
         schedule: NotificationCalendar.fromDate(
-          date: task.dueDate!,
+          date: task.reminderDate!,
           preciseAlarm: true,
           allowWhileIdle: true,
         ),
@@ -58,6 +58,7 @@ class DatabaseService {
           'isCompleted': task.isCompleted,
           'category': task.category,
           'dueDate': task.dueDate?.toIso8601String(),
+          'reminderDate': task.reminderDate?.toIso8601String(),
           'orderIndex': task.orderIndex,
         });
         debugPrint('☁️ BACKEND LOG: Task "${task.title}" successfully synced to Firebase Cloud!');
@@ -172,19 +173,22 @@ class DatabaseService {
             
           if (data['dueDate'] != null) {
             task.dueDate = DateTime.parse(data['dueDate']);
+          }
+          if (data['reminderDate'] != null) {
+            task.reminderDate = DateTime.parse(data['reminderDate']);
             
             // Re-schedule notifications for downloaded tasks
-            if (task.dueDate!.isAfter(DateTime.now()) && !task.isCompleted) {
+            if (task.reminderDate!.isAfter(DateTime.now()) && !task.isCompleted) {
               AwesomeNotifications().createNotification(
                 content: NotificationContent(
                   id: task.id,
                   channelKey: 'task_reminders',
-                  title: 'Task Due: ${task.title}',
+                  title: 'Reminder: ${task.title}',
                   body: task.description?.isNotEmpty == true ? task.description : 'Don\'t forget to complete your task!',
                   notificationLayout: NotificationLayout.Default,
                 ),
                 schedule: NotificationCalendar.fromDate(
-                  date: task.dueDate!,
+                  date: task.reminderDate!,
                   preciseAlarm: true,
                   allowWhileIdle: true,
                 ),

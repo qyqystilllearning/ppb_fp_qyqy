@@ -21,6 +21,9 @@ class TodoTask {
   // When the task is due. This will be used to trigger awesome_notifications!
   DateTime? dueDate;
 
+  // The specific time the user wants to be notified (independent of dueDate)
+  DateTime? reminderDate;
+
   // Used for Drag-and-Drop ordering!
   int orderIndex = 0;
 }

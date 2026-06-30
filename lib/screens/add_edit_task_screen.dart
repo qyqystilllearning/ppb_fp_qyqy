@@ -21,6 +21,10 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
   
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
+  
+  DateTime? _reminderDate;
+  TimeOfDay? _reminderTime;
+  
   String? _selectedCategory;
 
   final List<String> _categories = ['Work', 'Personal', 'School', 'Health', 'Finance'];
@@ -35,6 +39,11 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
     if (widget.task?.dueDate != null) {
       _selectedDate = widget.task!.dueDate;
       _selectedTime = TimeOfDay.fromDateTime(widget.task!.dueDate!);
+    }
+    
+    if (widget.task?.reminderDate != null) {
+      _reminderDate = widget.task!.reminderDate;
+      _reminderTime = TimeOfDay.fromDateTime(widget.task!.reminderDate!);
     }
   }
 
@@ -67,6 +76,28 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
     }
   }
 
+  Future<void> _pickReminderDate() async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: _reminderDate ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+    );
+    if (date != null) {
+      setState(() => _reminderDate = date);
+    }
+  }
+
+  Future<void> _pickReminderTime() async {
+    final time = await showTimePicker(
+      context: context,
+      initialTime: _reminderTime ?? TimeOfDay.now(),
+    );
+    if (time != null) {
+      setState(() => _reminderTime = time);
+    }
+  }
+
   void _saveTask() {
     if (_formKey.currentState!.validate()) {
       DateTime? finalDueDate;
@@ -80,11 +111,23 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
         );
       }
 
+      DateTime? finalReminderDate;
+      if (_reminderDate != null) {
+        finalReminderDate = DateTime(
+          _reminderDate!.year,
+          _reminderDate!.month,
+          _reminderDate!.day,
+          _reminderTime?.hour ?? 0,
+          _reminderTime?.minute ?? 0,
+        );
+      }
+
       final task = widget.task ?? TodoTask();
       task.title = _titleController.text.trim();
       task.description = _descController.text.trim();
       task.category = _selectedCategory;
       task.dueDate = finalDueDate;
+      task.reminderDate = finalReminderDate;
 
       DatabaseService.saveTask(task);
       Navigator.pop(context);
@@ -193,6 +236,62 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
                               const SizedBox(width: 12),
                               Text(
                                 _selectedTime == null ? 'Select Time' : _selectedTime!.format(context),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Reminder Date & Time
+                Text('Set Custom Reminder (Optional)', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: _pickReminderDate,
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardTheme.color,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.notifications_active, color: AppTheme.accentColor),
+                              const SizedBox(width: 12),
+                              Text(
+                                _reminderDate == null ? 'Reminder Date' : DateFormat('MMM d, yyyy').format(_reminderDate!),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: InkWell(
+                        onTap: _pickReminderTime,
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardTheme.color,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.alarm, color: AppTheme.accentColor),
+                              const SizedBox(width: 12),
+                              Text(
+                                _reminderTime == null ? 'Reminder Time' : _reminderTime!.format(context),
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ],
