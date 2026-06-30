@@ -12,7 +12,7 @@ Mobile Application Final Project (Pemrograman Perangkat Bergerak)
 <img src="https://img.shields.io/github/languages/count/qyqystilllearning/ppb_fp_qyqy?style=flat&color=0080ff" alt="repo-language-count">
 </p>
 
-<em>Built with [Insert Main Tech, e.g., Flutter / Kotlin / Java]</em>
+<em>Built with **Flutter**</em>
 
 </div>
 
