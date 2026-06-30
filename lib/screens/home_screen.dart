@@ -6,6 +6,7 @@ import '../theme/app_theme.dart';
 import '../widgets/task_tile.dart';
 import 'add_edit_task_screen.dart';
 import 'profile_screen.dart';
+import 'categories_screen.dart';
 
 enum TaskFilter { all, incomplete, complete }
 
@@ -252,46 +253,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _showStatistics() async {
-    final tasks = await DatabaseService.getAllTasks();
-    final completed = tasks.where((t) => t.isCompleted).length;
-    final total = tasks.length;
-    final double percentage = total == 0 ? 0 : (completed / total);
-
-    if (!mounted) return;
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Theme.of(context).cardTheme.color,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Productivity Stats', style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 22)),
-            const SizedBox(height: 24),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  height: 120,
-                  width: 120,
-                  child: CircularProgressIndicator(
-                    value: percentage,
-                    strokeWidth: 12,
-                    backgroundColor: Colors.grey.withValues(alpha: 0.2),
-                    color: AppTheme.primaryColor,
-                  ),
-                ),
-                Text('${(percentage * 100).toInt()}%', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Text('$completed out of $total tasks completed.', style: Theme.of(context).textTheme.bodyLarge),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
+  void _openCategoriesScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const CategoriesScreen()),
     );
   }
 
@@ -322,8 +287,8 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {}, // Already on home
           ),
           IconButton(
-            icon: const Icon(Icons.pie_chart_outline, color: Colors.grey), 
-            onPressed: _showStatistics, // Analytics Popup
+            icon: const Icon(Icons.grid_view, color: Colors.grey), 
+            onPressed: _openCategoriesScreen, // Categories Page
           ),
           const SizedBox(width: 48), // Space for FAB
           IconButton(
