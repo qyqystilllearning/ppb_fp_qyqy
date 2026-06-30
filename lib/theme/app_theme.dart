@@ -3,8 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Brand Colors
-  static const Color primaryColor = Color(0xFF5E44FF); // Deep Violet
-  static const Color accentColor = Color(0xFFFF8A65); // Peach Accent
+  static const Color primaryColor = Color(0xFFE63946); // Fire Red
+  static const Color accentColor = Color(0xFFFF9F1C); // Flame Orange
   
   // Backgrounds
   static const Color bgLight = Color(0xFFF8F9FA); // Very light grey
@@ -18,13 +18,13 @@ class AppTheme {
 
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [Color(0xFFE5D9FF), Color(0xFFFDE4E4)],
+    colors: [Color(0xFFFFEAC4), Color(0xFFFFCDD2)], // Soft warm fire (keeps dark text readable)
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
   
   static const LinearGradient cardGradient = LinearGradient(
-    colors: [Color(0xFF6C5DD3), Color(0xFF5E44FF)],
+    colors: [Color(0xFFE63946), Color(0xFFFF5400)], // Intense fire gradient
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
